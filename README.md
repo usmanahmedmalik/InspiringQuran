@@ -47,9 +47,25 @@ Output example:
   └─────────────────────────────────────────────────────────────────────┘
 ```
 
-Specify a locale (future feature):
+Specify a locale:
 ```bash
 php artisan inspire:quran --locale=en
+php artisan inspire:quran --locale=ur
+php artisan inspire:quran --locale=fr
+```
+
+Get ayat from a specific theme:
+```bash
+# List all available themes
+php artisan inspire:quran --list-themes
+
+# Get ayat from a specific theme
+php artisan inspire:quran --theme=hope
+php artisan inspire:quran --theme=patience
+php artisan inspire:quran --theme=gratitude
+
+# Combine theme with locale
+php artisan inspire:quran --theme=mercy --locale=ur
 ```
 
 ### Programmatic Usage
@@ -84,9 +100,23 @@ $inspiringQuran = new InspiringQuran();
 // Get a random quote
 $ayat = $inspiringQuran->getQuote('en');
 
+// Get ayat by theme
+$ayat = $inspiringQuran->byTheme('hope', 'en');
+
+// Get all ayats from a theme
+$hopeAyats = $inspiringQuran->getAllByTheme('hope');
+
+// Get available themes
+$themes = $inspiringQuran->getAvailableThemes();
+// ['hope', 'mercy', 'patience', 'prayer', 'gratitude', ...]
+
+// Get themes with descriptions
+$themesWithDesc = $inspiringQuran->getThemesWithDescriptions();
+// ['hope' => 'Verses about hope and ease in difficulty', ...]
+
 // Get all available locales
 $locales = $inspiringQuran->getAvailableLocales();
-// ['en']
+// ['en', 'nl', 'fr', 'tr', 'ur', 'de', 'es']
 
 // Get total count of ayats
 $count = $inspiringQuran->count();
@@ -94,6 +124,98 @@ $count = $inspiringQuran->count();
 
 // Get all ayats
 $allAyats = $inspiringQuran->getAllAyats();
+```
+
+### Web Usage Examples
+
+#### Display in Blade Template
+
+```php
+// In your controller
+use Usmanahmedmalik\InspiringQuran\InspiringQuran;
+
+public function index()
+{
+    $ayat = InspiringQuran::quote('en');
+    return view('welcome', compact('ayat'));
+}
+```
+
+```blade
+{{-- In your blade view --}}
+<div class="quran-ayat bg-gradient-to-r from-cyan-500 to-blue-500 text-white p-6 rounded-lg shadow-lg">
+    <p class="arabic text-2xl font-bold text-right mb-4" dir="rtl">
+        {{ $ayat['arabic'] }}
+    </p>
+    <p class="translation text-lg mb-3">
+        {{ $ayat['translations']['en'] }}
+    </p>
+    <p class="reference text-sm opacity-80">
+        — {{ $ayat['reference']['surah'] }} ({{ $ayat['reference']['ayah'] }})
+    </p>
+</div>
+```
+
+#### API Endpoint
+
+```php
+// In routes/api.php
+use Usmanahmedmalik\InspiringQuran\InspiringQuran;
+
+Route::get('/ayat/random', function (Request $request) {
+    $locale = $request->query('locale', 'en');
+    $theme = $request->query('theme');
+    
+    try {
+        $ayat = $theme 
+            ? InspiringQuran::byTheme($theme, $locale)
+            : InspiringQuran::quote($locale);
+            
+        return response()->json($ayat);
+    } catch (\InvalidArgumentException $e) {
+        return response()->json(['error' => $e->getMessage()], 400);
+    }
+});
+
+Route::get('/ayat/themes', function () {
+    return response()->json([
+        'themes' => InspiringQuran::getThemesWithDescriptions(),
+        'locales' => (new InspiringQuran())->getAvailableLocales(),
+    ]);
+});
+```
+
+```bash
+# API Usage examples
+curl http://localhost/api/ayat/random
+curl http://localhost/api/ayat/random?locale=ur
+curl http://localhost/api/ayat/random?theme=hope
+curl http://localhost/api/ayat/random?theme=patience&locale=fr
+curl http://localhost/api/ayat/themes
+```
+
+#### Daily Ayat Widget
+
+```php
+// In your AppServiceProvider or any controller
+use Illuminate\Support\Facades\View;
+use Usmanahmedmalik\InspiringQuran\InspiringQuran;
+
+public function boot()
+{
+    View::composer('*', function ($view) {
+        $view->with('dailyAyat', InspiringQuran::quote());
+    });
+}
+```
+
+```blade
+{{-- Now available in all views --}}
+<div class="daily-ayat-widget">
+    <h3>Daily Inspiration</h3>
+    <p>{{ $dailyAyat['translations']['en'] }}</p>
+    <small>{{ $dailyAyat['reference']['surah'] }}</small>
+</div>
 ```
 
 ### Data Structure
@@ -105,8 +227,12 @@ Each Ayat is returned in the following format:
     'arabic' => 'فَإِنَّ مَعَ ٱلْعُسْرِ يُسْرًا',
     'translations' => [
         'en' => 'For indeed, with hardship comes ease.',
-        // Future: 'ur' => 'Urdu translation',
-        // Future: 'tr' => 'Turkish translation',
+        'ur' => 'بیشک تنگی کے ساتھ آسانی ہے',
+        'fr' => 'Mais, avec la difficulté vient la facilité',
+        'tr' => 'Çünkü zorlukla beraber kolaylık vardır',
+        'de' => 'Doch wahrlich, mit der Erschwernis geht Erleichterung einher',
+        'es' => 'Ciertamente junto a la dificultad hay facilidad',
+        'nl' => 'Voorwaar, met moeite komt gemak',
     ],
     'reference' => [
         'surah' => 'Ash-Sharh',
@@ -117,34 +243,46 @@ Each Ayat is returned in the following format:
 
 ## Features
 
-- 25+ carefully curated, uplifting Quranic Ayats
-- Arabic text with English translations
-- Proper Surah references
-- Beautiful terminal output with colors and formatting
-- Multi-language support structure (currently English, more coming soon)
-- PHP 8.2+ with modern type hints
-- Compatible with Laravel 10, 11, and 12
-- Zero external dependencies beyond Laravel core
+- **25+ Carefully Curated Ayats**: Uplifting verses selected for inspiration
+- **7 Languages Supported**: English, Dutch, French, Turkish, Urdu, German, and Spanish
+- **Thematic Collections**: Filter ayats by theme (hope, mercy, patience, gratitude, etc.)
+- **Beautiful Terminal Output**: Colorful, formatted display in CLI
+- **Web & API Ready**: Easy integration in Blade views, APIs, and widgets
+- **Arabic Text with Translations**: Proper Surah references included
+- **PHP 8.2+ with Modern Type Hints**
+- **Compatible with Laravel 10, 11, and 12**
+- **Zero External Dependencies**: No API calls, works completely offline
+- **Forever-Proof Architecture**: Will never break due to external service changes
 
 ## Included Ayats
 
-The package includes verses about:
-- Hope & Ease
-- Mercy & Forgiveness
-- Patience & Trust
-- Gratitude
-- Guidance
-- Strength
-- Peace
-- Prayer & Remembrance
+The package includes 25 verses categorized into **13 themes**:
+
+### Available Themes
+- **Hope** - Verses about hope and ease in difficulty
+- **Mercy** - Verses about Allah's mercy and forgiveness
+- **Patience** - Verses about patience and perseverance
+- **Prayer** - Verses about prayer and worship
+- **Gratitude** - Verses about being thankful
+- **Peace** - Verses about peace and tranquility
+- **Strength** - Verses about strength and resilience
+- **Change** - Verses about change and improvement
+- **Trust** - Verses about trust in Allah
+- **Guidance** - Verses about guidance and direction
+- **Unity** - Verses about unity and brotherhood
+- **Accountability** - Verses about accountability and judgment
+- **Provision** - Verses about sustenance and provision
 
 All verses are carefully selected for their uplifting and inspirational nature.
 
 ## Future Roadmap
 
 - [ ] Add more Ayats (targeting 50+)
-- [ ] Add filtering by theme/category
+- [x] ~~Add filtering by theme/category~~ ✅ **Done!**
 - [ ] Add search functionality
+- [ ] Mood-based ayat selection
+- [ ] Time-based inspiration (morning/evening verses)
+- [ ] Verse of the day feature
 - [ ] Publish config file for customization
 
 ## Contributing
@@ -173,8 +311,9 @@ Contributions are welcome! Here's how you can help:
 ### Adding New Translations
 
 1. Add your translation to existing Ayats in the `translations` array
-2. Use the appropriate locale code (e.g., 'ur' for Urdu, 'tr' for Turkish)
-3. Submit a pull request
+2. Use the appropriate locale code (e.g., 'ur' for Urdu, 'tr' for Turkish, 'ar' for Arabic)
+3. Currently supported: English (en), Dutch (nl), French (fr), Turkish (tr), Urdu (ur), German (de), Spanish (es)
+4. Submit a pull request
 
 ## Requirements
 

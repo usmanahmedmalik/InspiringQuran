@@ -413,6 +413,27 @@ class InspiringQuran
     ];
 
     /**
+     * Thematic categorization of ayats.
+     *
+     * @var array<string, array<int, int>>
+     */
+    private static array $themes = [
+        'hope' => [0, 12],
+        'mercy' => [3, 14],
+        'patience' => [1, 5, 11, 16],
+        'prayer' => [4, 9],
+        'gratitude' => [7, 13],
+        'peace' => [8, 17],
+        'strength' => [6, 16],
+        'change' => [10],
+        'trust' => [2, 23],
+        'guidance' => [18, 19],
+        'unity' => [21],
+        'accountability' => [20, 22],
+        'provision' => [2, 15],
+    ];
+
+    /**
      * Get a random Quranic Ayat.
      *
      * This static method provides compatibility with Laravel's Inspiring class pattern.
@@ -486,5 +507,97 @@ class InspiringQuran
     public function count(): int
     {
         return count(self::$ayats);
+    }
+
+    /**
+     * Get a random ayat from a specific theme.
+     *
+     * @param string $theme The theme to get ayat from
+     * @param string|null $locale The locale for translation (defaults to 'en')
+     * @return array{arabic: string, translations: array<string, string>, reference: array{surah: string, ayah: string}}
+     * @throws \InvalidArgumentException If theme does not exist
+     */
+    public static function byTheme(string $theme, ?string $locale = 'en'): array
+    {
+        if (!isset(self::$themes[$theme])) {
+            throw new \InvalidArgumentException("Theme '{$theme}' does not exist. Available themes: " . implode(', ', array_keys(self::$themes)));
+        }
+
+        $ayatIndices = self::$themes[$theme];
+        $randomIndex = $ayatIndices[array_rand($ayatIndices)];
+
+        return self::$ayats[$randomIndex];
+    }
+
+    /**
+     * Get all ayats from a specific theme.
+     *
+     * @param string $theme The theme to get ayats from
+     * @return array<int, array{arabic: string, translations: array<string, string>, reference: array{surah: string, ayah: string}}>
+     * @throws \InvalidArgumentException If theme does not exist
+     */
+    public static function getAllByTheme(string $theme): array
+    {
+        if (!isset(self::$themes[$theme])) {
+            throw new \InvalidArgumentException("Theme '{$theme}' does not exist. Available themes: " . implode(', ', array_keys(self::$themes)));
+        }
+
+        $ayats = [];
+        foreach (self::$themes[$theme] as $index) {
+            $ayats[] = self::$ayats[$index];
+        }
+
+        return $ayats;
+    }
+
+    /**
+     * Get all available themes.
+     *
+     * @return array<int, string>
+     */
+    public static function getAvailableThemes(): array
+    {
+        return array_keys(self::$themes);
+    }
+
+    /**
+     * Get all themes with their descriptions.
+     *
+     * @return array<string, string>
+     */
+    public static function getThemesWithDescriptions(): array
+    {
+        return [
+            'hope' => 'Verses about hope, ease after hardship, and not despairing',
+            'mercy' => 'Verses about Allah\'s mercy and forgiveness',
+            'patience' => 'Verses about patience, perseverance, and endurance',
+            'prayer' => 'Verses about prayer, supplication, and Allah\'s response',
+            'gratitude' => 'Verses about being grateful and recognizing blessings',
+            'peace' => 'Verses about inner peace, tranquility, and reassurance',
+            'strength' => 'Verses about strength, courage, and not weakening',
+            'change' => 'Verses about self-improvement and personal change',
+            'trust' => 'Verses about trusting and relying on Allah',
+            'guidance' => 'Verses about guidance, knowledge, and Allah\'s teachings',
+            'unity' => 'Verses about unity and staying together',
+            'accountability' => 'Verses about accountability and consequences of actions',
+            'provision' => 'Verses about Allah\'s provision and sustenance',
+        ];
+    }
+
+    /**
+     * Get theme for a specific ayat index.
+     *
+     * @param int $ayatIndex The index of the ayat
+     * @return array<int, string> Array of themes this ayat belongs to
+     */
+    public static function getThemesForAyat(int $ayatIndex): array
+    {
+        $themes = [];
+        foreach (self::$themes as $theme => $indices) {
+            if (in_array($ayatIndex, $indices)) {
+                $themes[] = $theme;
+            }
+        }
+        return $themes;
     }
 }
