@@ -142,9 +142,6 @@ All verses are carefully selected for their uplifting and inspirational nature.
 
 ## Future Roadmap
 
-- [ ] Add Urdu translations
-- [ ] Add Turkish translations
-- [ ] Add French translations
 - [ ] Add more Ayats (targeting 50+)
 - [ ] Add filtering by theme/category
 - [ ] Add search functionality
