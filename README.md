@@ -120,7 +120,7 @@ $locales = $inspiringQuran->getAvailableLocales();
 
 // Get total count of ayats
 $count = $inspiringQuran->count();
-// 25
+// 75
 
 // Get all ayats
 $allAyats = $inspiringQuran->getAllAyats();
@@ -243,7 +243,7 @@ Each Ayat is returned in the following format:
 
 ## Features
 
-- **25+ Carefully Curated Ayats**: Uplifting verses selected for inspiration
+- **75+ Carefully Curated Ayats**: Uplifting verses selected for inspiration
 - **7 Languages Supported**: English, Dutch, French, Turkish, Urdu, German, and Spanish
 - **Thematic Collections**: Filter ayats by theme (hope, mercy, patience, gratitude, etc.)
 - **Beautiful Terminal Output**: Colorful, formatted display in CLI
@@ -256,28 +256,32 @@ Each Ayat is returned in the following format:
 
 ## Included Ayats
 
-The package includes 25 verses categorized into **13 themes**:
+The package includes **75 verses** categorized into **13 themes**:
 
 ### Available Themes
-- **Hope** - Verses about hope and ease in difficulty
-- **Mercy** - Verses about Allah's mercy and forgiveness
-- **Patience** - Verses about patience and perseverance
-- **Prayer** - Verses about prayer and worship
-- **Gratitude** - Verses about being thankful
-- **Peace** - Verses about peace and tranquility
-- **Strength** - Verses about strength and resilience
-- **Change** - Verses about change and improvement
-- **Trust** - Verses about trust in Allah
-- **Guidance** - Verses about guidance and direction
-- **Unity** - Verses about unity and brotherhood
-- **Accountability** - Verses about accountability and judgment
-- **Provision** - Verses about sustenance and provision
+
+#### Enhanced Themes (10+ verses each)
+- **Patience** (14 verses) - Verses about patience and perseverance
+- **Gratitude** (12 verses) - Verses about being thankful
+- **Hope** (12 verses) - Verses about hope and ease in difficulty
+- **Mercy** (12 verses) - Verses about Allah's mercy and forgiveness
+- **Guidance** (12 verses) - Verses about guidance and direction
+
+#### Standard Themes
+- **Prayer** (2 verses) - Verses about prayer and worship
+- **Peace** (2 verses) - Verses about peace and tranquility
+- **Strength** (2 verses) - Verses about strength and resilience
+- **Change** (1 verse) - Verses about change and improvement
+- **Trust** (2 verses) - Verses about trust in Allah
+- **Unity** (1 verse) - Verses about unity and brotherhood
+- **Accountability** (2 verses) - Verses about accountability and judgment
+- **Provision** (2 verses) - Verses about sustenance and provision
 
 All verses are carefully selected for their uplifting and inspirational nature.
 
 ## Future Roadmap
 
-- [ ] Add more Ayats (targeting 50+)
+- [x] ~~Add more Ayats (targeting 50+)~~ ✅ **Done! Now includes 75 verses**
 - [x] ~~Add filtering by theme/category~~ ✅ **Done!**
 - [ ] Add search functionality
 - [ ] Mood-based ayat selection
